@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>MARCIO - BEMFICA  | ORÇAMENTO E RECIBO</title>
+    <title>Dois de Julho | Orçamento e Recibo</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
         .documento { background: white; padding: 20px; border: 1px solid #ccc; max-width: 800px; margin: auto; }
@@ -21,14 +21,11 @@
 <div class="documento" id="areaOrcamento">
     <div class="header">
         <h1>ORÇAMENTO</h1>
-        <h2 style="margin: 5px 0; font-size: 1.6em; text-transform: uppercase;">BEMFICA</h2>
-        <p style="margin: 5px 0; font-size: 1.1em; font-weight: bold;">MARCIO | 11 988804392 | 11988794191</p>
-        <p style="margin: 5px 0; font-size: 1em;">Rua Eusébio de Paula Marcondes 909</p>
-        
-        <!-- Inputs ocultos para manter a perfeita funcionalidade do script de recibo -->
-        <input type="hidden" id="nomePrestador" value="MARCIO">
-        <input type="hidden" id="enderecoPrestador" value="Rua Eusébio de Paula Marcondes 909">
-        <input type="hidden" id="telefonePrestador" value="11 988804392 E 11988794191">
+        <div class="header-edit">
+            <input type="text" id="nomePrestador" placeholder="Nome do Prestador">
+            <input type="text" id="enderecoPrestador" placeholder="Endereço">
+            <input type="text" id="telefonePrestador" placeholder="Telefone">
+        </div>
     </div>
 
     <div class="grid-info">
