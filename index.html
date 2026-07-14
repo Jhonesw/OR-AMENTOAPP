@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dois de Julho | Orçamento e Recibo</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        .documento { background: white; padding: 20px; border: 1px solid #ccc; max-width: 800px; margin: auto; }
+        .header { text-align: center; border-bottom: 2px solid #333; margin-bottom: 15px; }
+        .header-edit input { width: 60%; border: none; border-bottom: 1px dashed #ccc; text-align: center; margin: 2px; }
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .input-text { width: 90%; padding: 5px; }
+        button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; background: #666; margin-top: 5px; }
+        @media print { button { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<div class="documento" id="areaOrcamento">
+    <div class="header">
+        <h1>ORÇAMENTO</h1>
+        <div class="header-edit">
+            <input type="text" id="nomePrestador" placeholder="Nome do Prestador">
+            <input type="text" id="enderecoPrestador" placeholder="Endereço">
+            <input type="text" id="telefonePrestador" placeholder="Telefone">
+        </div>
+    </div>
+
+    <div class="grid-info">
+        <div><strong>Pedido N°:</strong> <input type="text" id="idPedido" style="width: 60px;"></div>
+        <div><strong>Data Início:</strong> <input type="date" id="dataInicio"></div>
+        <div><strong>Cliente:</strong> <input type="text" class="input-text" id="cliente"></div>
+        <div><strong>CPF Cliente:</strong> <input type="text" class="input-text" id="cpfCliente"></div>
+        <div style="grid-column: span 2;"><strong>Endereço Cliente:</strong> <input type="text" class="input-text" id="enderecoCliente" style="width: 95%;"></div>
+    </div>
+
+    <h3>Produtos</h3>
+    <table id="tabelaProdutos">
+        <thead><tr><th>Produto</th><th>Qtd</th><th>Valor</th><th>Total</th></tr></thead>
+        <tbody id="corpoProdutos">
+            <tr>
+                <td><input type="text" class="input-text prodDesc"></td>
+                <td><input type="number" class="qtd" value="0" onchange="calc()" style="width:40px"></td>
+                <td><input type="number" class="unit" value="0" onchange="calc()" style="width:50px"></td>
+                <td class="subtotal">0.00</td>
+            </tr>
+        </tbody>
+    </table>
+    <button onclick="addRow('corpoProdutos', 'produto')">+ Adicionar Produto</button>
+
+    <h3>Serviços</h3>
+    <table id="tabelaServicos">
+        <thead><tr><th>Descrição</th><th>Valor</th></tr></thead>
+        <tbody id="corpoServicos">
+            <tr>
+                <td><input type="text" class="input-text servDesc"></td>
+                <td><input type="number" class="val-serv" value="0" onchange="calc()"></td>
+            </tr>
+        </tbody>
+    </table>
+    <button onclick="addRow('corpoServicos', 'servico')">+ Adicionar Serviço</button>
+
+    <div style="text-align: right; font-size: 1.3em; margin: 20px 0;">
+        <strong>TOTAL: R$ <span id="totalGeral">0.00</span></strong>
+    </div>
+
+    <button style="background:#555; width: 100%; font-size: 1.1em;" onclick="window.print()">BAIXAR ORÇAMENTO (PDF)</button>
+    <button style="background:#25d366; width: 100%; font-size: 1.1em;" onclick="gerarRecibo()">GERAR RECIBO</button>
+</div>
+
+<script>
+    document.getElementById('idPedido').value = localStorage.getItem('cont') || 1;
+    document.getElementById('dataInicio').valueAsDate = new Date();
+
+    function calc() {
+        let total = 0;
+        document.querySelectorAll('#corpoProdutos tr').forEach(tr => {
+            let q = parseFloat(tr.querySelector('.qtd').value) || 0;
+            let u = parseFloat(tr.querySelector('.unit').value) || 0;
+            let sub = q * u;
+            tr.querySelector('.subtotal').innerText = sub.toFixed(2);
+            total += sub;
+        });
+        document.querySelectorAll('.val-serv').forEach(i => total += parseFloat(i.value) || 0);
+        document.getElementById('totalGeral').innerText = total.toFixed(2);
+    }
+
+    function addRow(tbodyId, tipo) {
+        let tbody = document.getElementById(tbodyId);
+        if(tipo === 'produto') tbody.innerHTML += '<tr><td><input type="text" class="input-text prodDesc"></td><td><input type="number" class="qtd" value="0" onchange="calc()" style="width:40px"></td><td><input type="number" class="unit" value="0" onchange="calc()" style="width:50px"></td><td class="subtotal">0.00</td></tr>';
+        else tbody.innerHTML += '<tr><td><input type="text" class="input-text servDesc"></td><td><input type="number" class="val-serv" value="0" onchange="calc()"></td></tr>';
+    }
+
+    function gerarRecibo() {
+        const win = window.open("", "_blank", "width=800,height=700");
+        const total = document.getElementById('totalGeral').innerText;
+        let descList = [];
+        document.querySelectorAll('.prodDesc').forEach(i => { if(i.value) descList.push(i.value); });
+        document.querySelectorAll('.servDesc').forEach(i => { if(i.value) descList.push(i.value); });
+
+        win.document.write(`
+            <div id="areaRecibo" style="border: 2px solid #000; padding: 20px; font-family: sans-serif;">
+                <style>
+                    @media print { button { display: none !important; } }
+                </style>
+                <h2 style="text-align:center; background:#a9c5eb;">RECIBO DE PRESTAÇÃO DE SERVIÇO – PESSOA FÍSICA</h2>
+                <p>Eu, <b>${document.getElementById('nomePrestador').value}</b>, 
+                atendendo no endereço <b>${document.getElementById('enderecoPrestador').value}</b> (Tel: ${document.getElementById('telefonePrestador').value}), 
+                recebi de <b>${document.getElementById('cliente').value}</b>, 
+                residente à <b>${document.getElementById('enderecoCliente').value}</b>, 
+                CPF n° <b>${document.getElementById('cpfCliente').value}</b>, 
+                a importância de R$ ${total}, referente ao pagamento do Pedido N° <b>${document.getElementById('idPedido').value}</b>, 
+                contemplando os serviços/produtos: <b>${descList.join(', ')}</b>. 
+                O serviço teve início em ${document.getElementById('dataInicio').value} e o pagamento foi processado na data de hoje.</p>
+                <p>Local e data: São Paulo, ${new Date().toLocaleDateString()}</p>
+                <br><br><hr style="width:50%"><p style="text-align:center;">Assinatura do prestador de serviço</p>
+                <button style="background:#555; color:white; padding:10px; border:none; width:100%; font-size:1.1em; cursor:pointer;" onclick="window.print()">BAIXAR RECIBO (PDF)</button>
+            </div>
+        `);
+    }
+</script>
+</body>
+</html>
